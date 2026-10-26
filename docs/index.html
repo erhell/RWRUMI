@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RWRUMI · ORCA hand UMI</title>
+<meta name="description" content="RWRUMI: a hand-held Universal Manipulation Interface for the dexterous ORCA hand, recording joint, tactile and pose data. Team 4, Real World Robotics.">
+<style>
+  :root {
+    --bg: #f7f6f3;
+    --surface: #ffffff;
+    --surface-2: #efede8;
+    --text: #1d1d1b;
+    --muted: #5f5d57;
+    --border: #dcd9d1;
+    --accent: #0f6e6e;
+    --accent-soft: #d8ecea;
+    --planned: #8a6a12;
+    --planned-soft: #f6ecd0;
+    --done: #2f6b2f;
+    --done-soft: #dcefd9;
+    --tbd: #8b3b3b;
+    --tbd-soft: #f5dddd;
+    --code-bg: #1f2326;
+    --code-text: #e6e6e3;
+    --radius: 10px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141516;
+      --surface: #1c1e20;
+      --surface-2: #24272a;
+      --text: #e9e8e4;
+      --muted: #a3a19b;
+      --border: #33373b;
+      --accent: #5cc3bd;
+      --accent-soft: #19393a;
+      --planned: #e3c066;
+      --planned-soft: #3a3120;
+      --done: #8fd18f;
+      --done-soft: #1f3820;
+      --tbd: #ec9a9a;
+      --tbd-soft: #3d2324;
+      --code-bg: #0e0f10;
+      --code-text: #e6e6e3;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, sans-serif;
+  }
+  a { color: var(--accent); }
+  code, pre { font-family: ui-monospace, "SFMono-Regular", "Ubuntu Mono", Menlo, monospace; }
+  code { font-size: .9em; background: var(--surface-2); padding: .1em .35em; border-radius: 4px; }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 16px; }
+
+  header.top {
+    position: sticky; top: 0; z-index: 10;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+  }
+  header.top .wrap { display: flex; align-items: center; gap: 24px; height: 56px; }
+  .brand { font-weight: 700; letter-spacing: .02em; text-decoration: none; color: var(--text); }
+  nav { display: flex; gap: 18px; overflow-x: auto; scrollbar-width: none; }
+  nav a { color: var(--muted); text-decoration: none; font-size: .92rem; white-space: nowrap; }
+  nav a:hover { color: var(--text); }
+
+  .hero { padding: 64px 0 40px; }
+  .eyebrow { color: var(--accent); font-weight: 600; font-size: .85rem; letter-spacing: .08em; text-transform: uppercase; }
+  h1 { font-size: clamp(2rem, 5vw, 3.1rem); line-height: 1.1; margin: .3em 0 .4em; letter-spacing: -.01em; }
+  .lead { font-size: 1.15rem; color: var(--muted); max-width: 60ch; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+  .chip { border: 1px solid var(--border); background: var(--surface); border-radius: 999px; padding: 4px 12px; font-size: .85rem; color: var(--muted); }
+  .btns { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
+  .btn { display: inline-block; padding: 9px 16px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: .95rem; }
+  .btn.primary { background: var(--accent); color: var(--bg); }
+  .btn.ghost { border: 1px solid var(--border); color: var(--text); background: var(--surface); }
+
+  section { padding: 40px 0; border-top: 1px solid var(--border); }
+  h2 { font-size: 1.5rem; margin: 0 0 .3em; }
+  .sub { color: var(--muted); margin: 0 0 24px; max-width: 70ch; }
+
+  .diagram { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; overflow-x: auto; }
+  .diagram svg { display: block; width: 100%; min-width: 640px; height: auto; }
+  .diagram .box { fill: var(--surface-2); stroke: var(--border); }
+  .diagram .box.accent { fill: var(--accent-soft); stroke: var(--accent); }
+  .diagram .box.tbd { fill: var(--tbd-soft); stroke: var(--tbd); stroke-dasharray: 5 4; }
+  .diagram .group { fill: none; stroke: var(--accent); stroke-dasharray: 6 5; }
+  .diagram text { fill: var(--text); font: 600 13px system-ui, sans-serif; }
+  .diagram text.small { fill: var(--muted); font: 400 11px ui-monospace, monospace; }
+  .diagram text.label { fill: var(--accent); font: 600 11px system-ui, sans-serif; letter-spacing: .06em; }
+  .diagram .edge { stroke: var(--muted); stroke-width: 1.5; fill: none; marker-end: url(#arrow); }
+  .diagram #arrow path { fill: var(--muted); }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; }
+  .card h3 { margin: 0 0 6px; font-size: 1.05rem; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .card p { margin: 0; color: var(--muted); font-size: .95rem; }
+  .card .meta { margin-top: 12px; font-size: .82rem; color: var(--muted); }
+
+  .pill { font-size: .72rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+  .pill.planned { color: var(--planned); background: var(--planned-soft); }
+  .pill.done { color: var(--done); background: var(--done-soft); }
+  .pill.tbd { color: var(--tbd); background: var(--tbd-soft); }
+
+  .tree { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 0; font: 14px/1.5 ui-monospace, monospace; overflow-x: auto; }
+  .tree .row { display: grid; grid-template-columns: minmax(260px, auto) 1fr auto; gap: 16px; padding: 5px 18px; align-items: center; }
+  .tree .row:hover { background: var(--surface-2); }
+  .tree .path { white-space: pre; }
+  .tree .desc { color: var(--muted); font-family: system-ui, sans-serif; font-size: .9rem; }
+  @media (max-width: 640px) {
+    .tree .row { grid-template-columns: 1fr auto; }
+    .tree .desc { grid-column: 1 / -1; grid-row: 2; padding-left: 2ch; }
+  }
+
+  table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; font-size: .95rem; }
+  th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { background: var(--surface-2); font-weight: 600; font-size: .85rem; color: var(--muted); }
+  tr:last-child td { border-bottom: 0; }
+  .table-wrap { overflow-x: auto; }
+
+  pre { background: var(--code-bg); color: var(--code-text); padding: 16px 18px; border-radius: var(--radius); overflow-x: auto; font-size: .88rem; line-height: 1.55; margin: 0; }
+  pre .c { color: #8c9296; }
+  .note { border-left: 3px solid var(--planned); background: var(--planned-soft); padding: 10px 14px; border-radius: 0 8px 8px 0; margin: 0 0 18px; font-size: .95rem; }
+
+  ul.todo { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+  ul.todo li { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; display: flex; gap: 10px; align-items: baseline; }
+  ul.todo li::before { content: ""; flex: none; width: 12px; height: 12px; border: 2px solid var(--muted); border-radius: 3px; transform: translateY(2px); }
+
+  footer { padding: 32px 0 48px; color: var(--muted); font-size: .88rem; border-top: 1px solid var(--border); }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#">RWRUMI</a>
+    <nav>
+      <a href="#overview">Overview</a>
+      <a href="#subsystems">Subsystems</a>
+      <a href="#layout">Repository</a>
+      <a href="#stack">Stack</a>
+      <a href="#setup">Setup</a>
+      <a href="#decisions">Open decisions</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">Team 4 · Real World Robotics</div>
+    <h1>A Universal Manipulation Interface for the ORCA hand</h1>
+    <p class="lead">A hand-held device that uses the ORCA hand's kinematics, so people can show manipulation tasks by hand. It records joint angles, touch and pose so the robot can learn the same tasks.</p>
+    <div class="chips">
+      <span class="chip">Ubuntu 26.04</span>
+      <span class="chip">ROS 2 Lyrical</span>
+      <span class="chip">Python</span>
+      <span class="chip">ORCA v2 · right hand</span>
+      <span class="chip">rosbag2 / MCAP</span>
+    </div>
+    <div class="btns">
+      <a class="btn primary" href="https://github.com/erhell/RWRUMI">View on GitHub</a>
+      <a class="btn ghost" href="#setup">Getting started</a>
+    </div>
+  </div>
+
+  <section id="overview">
+    <h2>System overview</h2>
+    <p class="sub">The UMI uses the same kinematics as the ORCA hand. Our own sensors and pose estimation write into one time-synced recording, which is then exported into a training dataset.</p>
+    <div class="diagram" role="img" aria-label="Data flow: joint and tactile sensors on the UMI and a camera or tracker feed pose estimation and a recorder; the ORCA description feeds robot_state_publisher; the recorder exports an HDF5 dataset for policy learning.">
+      <svg viewBox="0 0 960 360" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z"/>
+          </marker>
+        </defs>
+
+        <rect class="group" x="16" y="20" width="200" height="200" rx="12"/>
+        <text class="label" x="32" y="42">HAND-HELD UMI</text>
+        <rect class="box" x="36" y="60" width="160" height="56" rx="8"/>
+        <text x="116" y="85" text-anchor="middle">Joint sensors</text>
+        <text class="small" x="116" y="103" text-anchor="middle">/umi/joint_states</text>
+        <rect class="box" x="36" y="140" width="160" height="56" rx="8"/>
+        <text x="116" y="165" text-anchor="middle">Tactile sensors</text>
+        <text class="small" x="116" y="183" text-anchor="middle">/umi/tactile</text>
+
+        <rect class="box tbd" x="36" y="260" width="160" height="56" rx="8"/>
+        <text x="116" y="285" text-anchor="middle">Camera / tracker</text>
+        <text class="small" x="116" y="303" text-anchor="middle">hardware TBD</text>
+
+        <rect class="box" x="290" y="20" width="190" height="56" rx="8"/>
+        <text x="385" y="45" text-anchor="middle">orcahand_description</text>
+        <text class="small" x="385" y="63" text-anchor="middle">URDF + meshes (submodule)</text>
+        <rect class="box" x="290" y="110" width="190" height="56" rx="8"/>
+        <text x="385" y="135" text-anchor="middle">robot_state_publisher</text>
+        <text class="small" x="385" y="153" text-anchor="middle">/tf hand links</text>
+        <rect class="box" x="290" y="260" width="190" height="56" rx="8"/>
+        <text x="385" y="285" text-anchor="middle">Pose estimation</text>
+        <text class="small" x="385" y="303" text-anchor="middle">global + relative · /tf</text>
+
+        <rect class="box accent" x="560" y="140" width="170" height="70" rx="8"/>
+        <text x="645" y="170" text-anchor="middle">Recorder</text>
+        <text class="small" x="645" y="190" text-anchor="middle">rosbag2 · MCAP</text>
+
+        <rect class="box" x="790" y="60" width="150" height="56" rx="8"/>
+        <text x="865" y="85" text-anchor="middle">Export</text>
+        <text class="small" x="865" y="103" text-anchor="middle">HDF5 episodes</text>
+        <rect class="box" x="790" y="240" width="150" height="56" rx="8"/>
+        <text x="865" y="265" text-anchor="middle">Policy learning</text>
+        <text class="small" x="865" y="283" text-anchor="middle">on the ORCA hand</text>
+
+        <path class="edge" d="M385 76 V108"/>
+        <path class="edge" d="M196 88 H240 V138 H288"/>
+        <path class="edge" d="M480 138 H520 V160 H558"/>
+        <path class="edge" d="M196 168 H240 V200 H520 V180 H558"/>
+        <path class="edge" d="M196 288 H288"/>
+        <path class="edge" d="M480 288 H520 V195 H558"/>
+        <path class="edge" d="M730 165 H760 V88 H788"/>
+        <path class="edge" d="M865 116 V238"/>
+      </svg>
+    </div>
+  </section>
+
+  <section id="subsystems">
+    <h2>Subsystems</h2>
+    <p class="sub">Each subsystem is its own ROS 2 package. You can develop, test and launch each one alone.</p>
+    <div class="grid">
+      <div class="card">
+        <h3>Shared kinematics <span class="pill planned">planned</span></h3>
+        <p>The ORCA hand URDF and STL meshes. This is the one source of truth for joint names, limits and frames.</p>
+        <div class="meta"><code>src/external/orcahand_description</code> · upstream submodule</div>
+      </div>
+      <div class="card">
+        <h3>Joint sensing <span class="pill planned">planned</span></h3>
+        <p>Reads our own joint sensors and publishes <code>sensor_msgs/JointState</code>, with joint names mapped to the URDF.</p>
+        <div class="meta"><code>src/rwrumi_joint_sensors</code></div>
+      </div>
+      <div class="card">
+        <h3>Tactile sensing <span class="pill planned">planned</span></h3>
+        <p>Reads our own tactile sensors and publishes a custom tactile array message with hardware timestamps.</p>
+        <div class="meta"><code>src/rwrumi_tactile</code> · msgs in <code>rwrumi_interfaces</code></div>
+      </div>
+      <div class="card">
+        <h3>Pose estimation <span class="pill tbd">hardware TBD</span></h3>
+        <p>Estimates the global pose of the UMI in the world frame and the relative pose between the UMI and the object. Both go out on <code>/tf</code>.</p>
+        <div class="meta"><code>src/rwrumi_pose</code></div>
+      </div>
+      <div class="card">
+        <h3>Recording <span class="pill planned">planned</span></h3>
+        <p>Records all streams, time-synced, into rosbag2 (MCAP), one bag per demonstration episode.</p>
+        <div class="meta"><code>src/rwrumi_recorder</code></div>
+      </div>
+      <div class="card">
+        <h3>Dataset export <span class="pill planned">planned</span></h3>
+        <p>Converts the recorded bags into per-episode HDF5 files for policy learning.</p>
+        <div class="meta"><code>src/rwrumi_recorder</code></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="layout">
+    <h2>Repository layout</h2>
+    <p class="sub">What is where. Planned entries are added as the project grows.</p>
+    <div class="tree">
+      <div class="row"><span class="path">RWRUMI/</span><span class="desc"></span><span></span></div>
+      <div class="row"><span class="path">├── README.md</span><span class="desc">Project overview</span><span class="pill done">exists</span></div>
+      <div class="row"><span class="path">├── docs/index.html</span><span class="desc">This page (GitHub Pages)</span><span class="pill done">exists</span></div>
+      <div class="row"><span class="path">├── requirements.in</span><span class="desc">Top-level Python deps, edited by hand</span><span class="pill planned">planned</span></div>
+      <div class="row"><span class="path">├── requirements.txt</span><span class="desc">Locked exact versions, generated</span><span class="pill planned">planned</span></div>
+      <div class="row"><span class="path">├── scripts/setup_env.sh</span><span class="desc">One-command setup / update</span><span class="pill planned">planned</span></div>
+      <div class="row"><span class="path">└── src/</span><span class="desc">ROS 2 workspace sources</span><span class="pill planned">planned</span></div>
+      <div class="row"><span class="path">    ├── external/orcahand_description/</span><span class="desc">ORCA URDF/MJCF + meshes (submodule)</span><span class="pill planned">planned</span></div>
+      <div class="row"><span class="path">    ├── rwrumi_interfaces/</span><span class="desc">Custom messages</span><span class="pill planned">planned</span></div>
+      <div class="row"><span class="path">    ├── rwrumi_joint_sensors/</span><span class="desc">Joint sensor driver</span><span class="pill planned">planned</span></div>
+      <div class="row"><span class="path">    ├── rwrumi_tactile/</span><span class="desc">Tactile sensor driver</span><span class="pill planned">planned</span></div>
+      <div class="row"><span class="path">    ├── rwrumi_pose/</span><span class="desc">Global + relative pose estimation</span><span class="pill planned">planned</span></div>
+      <div class="row"><span class="path">    ├── rwrumi_recorder/</span><span class="desc">Recording + bag → HDF5 export</span><span class="pill planned">planned</span></div>
+      <div class="row"><span class="path">    └── rwrumi_bringup/</span><span class="desc">Launch files, configs, RViz</span><span class="pill planned">planned</span></div>
+    </div>
+    <p class="sub" style="margin-top:16px">Conventions (proposed): packages are prefixed <code>rwrumi_</code>, all topics live under <code>/umi</code>, and frames follow REP 105 (<code>world</code> → <code>umi_base</code> → URDF links).</p>
+  </section>
+
+  <section id="stack">
+    <h2>Tech stack</h2>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Layer</th><th>Choice</th></tr>
+        <tr><td>OS</td><td>Ubuntu 26.04 LTS</td></tr>
+        <tr><td>Middleware</td><td>ROS 2 Lyrical Luth (the only ROS 2 distro released for 26.04)</td></tr>
+        <tr><td>Language</td><td>Python 3 (<code>rclpy</code>)</td></tr>
+        <tr><td>Hand model</td><td><a href="https://github.com/orcahand/orcahand_description">orcahand/orcahand_description</a> (MIT), v2 right hand</td></tr>
+        <tr><td>Recording</td><td><code>rosbag2</code> with MCAP storage</td></tr>
+        <tr><td>Dataset</td><td>HDF5 (<code>h5py</code>)</td></tr>
+        <tr><td>Pose estimation</td><td><span class="pill tbd">TBD</span> depends on the camera / tracker choice</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section id="setup">
+    <h2>Getting started</h2>
+    <p class="note">The workspace isn't set up yet. These are the intended steps once it is.</p>
+<pre><span class="c"># 1. Clone including the ORCA submodule</span>
+git clone --recursive https://github.com/erhell/RWRUMI.git
+cd RWRUMI
+
+<span class="c"># 2. ROS 2 Lyrical installed and sourced</span>
+source /opt/ros/lyrical/setup.bash
+
+<span class="c"># 3. System + ROS dependencies from every package.xml</span>
+rosdep install --from-paths src --ignore-src -y
+
+<span class="c"># 4. Python dependencies</span>
+python3 -m venv --system-site-packages .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+
+<span class="c"># 5. Build</span>
+colcon build --symlink-install
+source install/setup.bash</pre>
+
+    <h3 style="margin:28px 0 10px">Same environment for everyone, without Docker</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Layer</th><th>Pinned by</th><th>Update after <code>git pull</code></th></tr>
+        <tr><td>OS + ROS</td><td>Ubuntu 26.04 + ROS 2 Lyrical</td><td><code>sudo apt update &amp;&amp; sudo apt upgrade</code></td></tr>
+        <tr><td>ROS / apt deps</td><td>each <code>package.xml</code></td><td><code>rosdep install --from-paths src --ignore-src -y</code></td></tr>
+        <tr><td>Python deps</td><td><code>requirements.txt</code> (exact versions)</td><td><code>pip install -r requirements.txt</code></td></tr>
+        <tr><td>ORCA files</td><td>submodule commit</td><td><code>git submodule update --init --recursive</code></td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section id="decisions">
+    <h2>Open decisions</h2>
+    <ul class="todo">
+      <li>Camera / tracker for global pose estimation</li>
+      <li>Method for relative UMI ↔ object pose</li>
+      <li>Joint sensor hardware and interface (serial, I²C, …)</li>
+      <li>Tactile sensor hardware and message format</li>
+      <li>Dataset format details (episode structure, sampling rate)</li>
+      <li>License for our own code</li>
+    </ul>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    Built on the open-source <a href="https://orcahand.com">ORCA hand</a> (MIT) and inspired by Chi et al., <em>Universal Manipulation Interface</em>, RSS 2024. ·
+    <a href="https://github.com/erhell/RWRUMI">github.com/erhell/RWRUMI</a>
+  </div>
+</footer>
+
+</body>
+</html>
