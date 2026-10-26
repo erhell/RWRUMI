@@ -1,24 +1,19 @@
-# RWRUMI — a Universal Manipulation Interface based on the ORCA hand
+# RWRUMI — a Universal Manipulation Interface for the ORCA hand v2
 
 **Team 4 · Real World Robotics (RWR)**
 Project page: **https://erhell.github.io/RWRUMI/**
 
-RWRUMI is our own hand-held data-collection system (a *UMI*) for dexterous
-manipulation. It is a **separate robotic system**, developed completely by us, but it
-is **based on the open-source [ORCA hand](https://orcahand.com)**: we start from ORCA's
-kinematic model and meshes and build our own device, sensors and software around them.
+We are a team in the course **Real World Robotics (RWR)**, which works with the
+[ORCA hand](https://orcahand.com). Our course task, **Task X**, is to build a
+**Universal Manipulation Interface (UMI) for the ORCA hand v2**: a hand-held device that
+records joint angles, tactile data and the global and relative pose while a person does a
+manipulation task, so the ORCA hand can learn it.
 
-An operator holds or wears the UMI and does a manipulation task by hand. Because the
-UMI starts from the ORCA hand's kinematics, the recorded motion can be transferred to a
-real ORCA hand. While the operator works, the UMI records:
+We develop **our own ROS 2 packages for the UMI system**. The ORCA hand v2 model (URDF and
+meshes, MIT license) is our starting point: we copy the files we need into our own
+package `rwrumi_description`, and build everything else ourselves.
 
-- **joint angles** from our own joint sensors,
-- **contact data** from our own tactile sensors,
-- the **global pose** of the UMI (in the world frame) and the **relative pose**
-  between the UMI and the manipulated object.
-
-Everything is time-stamped and stored as ROS 2 bags, then exported into a dataset
-for learning manipulation policies.
+The instructions in this README are for the collaborators of Team 4.
 
 > **Status:** development environment ready (ROS 2 Humble via RoboStack). Next: our own
 > description package `rwrumi_description` (based on ORCA v2) and the first ROS packages.
@@ -58,47 +53,6 @@ flowchart LR
 | Pose estimation | Global pose of the UMI and relative UMI ↔ object pose | Team 4 | planned (camera/tracker TBD) |
 | Recording | Synced recording of all streams to rosbag2 (MCAP) | Team 4 | planned |
 | Dataset export | Converts bags into per-episode HDF5 for training | Team 4 | planned |
-
----
-
-## Relationship to ORCA
-
-RWRUMI is **not** a fork or a plugin of ORCA. It is our own system that **reuses ORCA's
-files as a starting point**.
-
-**What we take from ORCA**
-
-| What | From | Where it goes in our repo |
-|---|---|---|
-| Right-hand URDF (v2) | [`orcahand/orcahand_description`](https://github.com/orcahand/orcahand_description) → `v2/models/urdf/orcahand_right.urdf` | `src/rwrumi_description/urdf/` |
-| The STL meshes that URDF uses (16 files, ~23 MB) | `v2/models/assets/right/` | `src/rwrumi_description/meshes/` |
-| ORCA's MIT license | `LICENSE` | `src/rwrumi_description/LICENSE.orca` |
-
-Source version: `orcahand_description` commit `b9b349a2`.
-
-**How we use these files**
-
-- **Copied, not linked.** The files are copied into our own package (`rwrumi_description`).
-  There is no git submodule and no dependency on ORCA's repositories at build or run time.
-- **Ours to change.** We rename the auto-generated link/joint names
-  (e.g. `I-PP_bacbd481_to_I-AP-R_d95d02d1` → `index_mcp`) and add our own parts
-  (`umi_base`, handle/mount, camera, sensor frames). Mesh paths point to
-  `package://rwrumi_description/meshes/…`.
-- **Only what we need.** We copy only the v2 right-hand files we actually use, not ORCA's
-  whole repository (~512 MB).
-- **Documented.** `src/rwrumi_description/SOURCE.md` records where every copied file came
-  from (repo, commit, path) and lists **every change we made relative to ORCA**
-  (renamed joints, added links, changed dimensions). That list is what lets us map UMI
-  data back onto the real ORCA hand.
-- **License kept.** ORCA's files are MIT-licensed. Copying is allowed as long as ORCA's
-  license text stays with the copied files.
-- **No automatic updates.** If ORCA changes its model later, we do not get it automatically.
-  We review and copy changes over by hand, only when we want them, and note it in `SOURCE.md`.
-
-**ORCA repositories we use only as reference** (read on GitHub, not copied):
-[`orca_core`](https://github.com/orcahand/orca_core) (hand control, kinematics),
-[`orcahand_hardware`](https://github.com/orcahand/orcahand_hardware) (CAD/STL, print files),
-[`rwr_system`](https://github.com/orcahand/rwr_system) (2024 RWR course ROS code: logger, HDF5 export).
 
 ---
 

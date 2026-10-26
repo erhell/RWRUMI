@@ -143,7 +143,6 @@
     <nav>
       <a href="#overview">Overview</a>
       <a href="#subsystems">Subsystems</a>
-      <a href="#orca">Based on ORCA</a>
       <a href="#layout">Repository</a>
       <a href="#stack">Stack</a>
       <a href="#setup">Setup</a>
@@ -156,8 +155,9 @@
 
   <div class="hero">
     <div class="eyebrow">Team 4 · Real World Robotics</div>
-    <h1>A Universal Manipulation Interface based on the ORCA hand</h1>
-    <p class="lead">Our own hand-held robotic system for showing manipulation tasks by hand. It's built on the open-source ORCA hand's model and records joint angles, touch and pose, so a real ORCA hand can learn the same tasks.</p>
+    <h1>A Universal Manipulation Interface for the ORCA hand v2</h1>
+    <p class="lead">We're a team in the course Real World Robotics, which works with the ORCA hand. Our course task, Task X, is to build a UMI for the ORCA hand v2: a hand-held device that records joint angles, touch and pose while a person does a task, so the ORCA hand can learn it.</p>
+    <p class="lead" style="margin-top:12px">We develop our own ROS 2 packages for the UMI system. The ORCA hand v2 model is our starting point: we copy the files we need into our own package <code>rwrumi_description</code>.</p>
     <div class="chips">
       <span class="chip">Ubuntu 26.04</span>
       <span class="chip">ROS 2 Humble · RoboStack</span>
@@ -264,47 +264,6 @@
         <div class="meta"><code>src/rwrumi_recorder</code></div>
       </div>
     </div>
-  </section>
-
-  <section id="orca">
-    <h2>Relationship to ORCA</h2>
-    <p class="sub">RWRUMI isn't a fork or a plugin of ORCA. It's our own system that reuses ORCA's open-source files as a starting point.</p>
-    <div class="table-wrap">
-      <table>
-        <tr><th>What we take</th><th>From <a href="https://github.com/orcahand/orcahand_description">orcahand_description</a></th><th>Goes to</th></tr>
-        <tr><td>Right-hand URDF (v2)</td><td><code>v2/models/urdf/orcahand_right.urdf</code></td><td><code>src/rwrumi_description/urdf/</code></td></tr>
-        <tr><td>The 16 STL meshes it uses (~23 MB)</td><td><code>v2/models/assets/right/</code></td><td><code>src/rwrumi_description/meshes/</code></td></tr>
-        <tr><td>ORCA's MIT license</td><td><code>LICENSE</code></td><td><code>src/rwrumi_description/LICENSE.orca</code></td></tr>
-      </table>
-    </div>
-    <p class="sub" style="margin-top:12px">Source version: commit <code>b9b349a2</code>.</p>
-    <div class="grid" style="margin-top:8px">
-      <div class="card">
-        <h3>Copied, not linked</h3>
-        <p>The files live in our own package. There's no git submodule and no dependency on ORCA's repositories when building or running.</p>
-      </div>
-      <div class="card">
-        <h3>Ours to change</h3>
-        <p>We rename the auto-generated joint names (<code>I-PP_bacbd481_to_…</code> → <code>index_mcp</code>) and add our own parts: <code>umi_base</code>, mount, camera and sensor frames.</p>
-      </div>
-      <div class="card">
-        <h3>Only what we need</h3>
-        <p>We copy only the v2 right-hand files we use, not ORCA's whole repository (~512 MB).</p>
-      </div>
-      <div class="card">
-        <h3>Documented</h3>
-        <p><code>SOURCE.md</code> records the origin of every copied file and every change we make. That list lets us map UMI data back onto the real ORCA hand.</p>
-      </div>
-      <div class="card">
-        <h3>License kept</h3>
-        <p>ORCA's files are MIT-licensed. We may copy them as long as their license text stays with the copied files.</p>
-      </div>
-      <div class="card">
-        <h3>No automatic updates</h3>
-        <p>If ORCA changes its model, we review and copy changes over by hand, only when we want them.</p>
-      </div>
-    </div>
-    <p class="sub" style="margin-top:16px">Reference only (read on GitHub, not copied): <a href="https://github.com/orcahand/orca_core">orca_core</a>, <a href="https://github.com/orcahand/orcahand_hardware">orcahand_hardware</a>, <a href="https://github.com/orcahand/rwr_system">rwr_system</a>.</p>
   </section>
 
   <section id="layout">
