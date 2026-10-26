@@ -11,6 +11,7 @@ channels:
   - robostack-humble
   - conda-forge
 dependencies:
+  - python=3.12
   # ROS 2
   - ros-humble-desktop=0.10
   # robot model / visualization
@@ -19,7 +20,7 @@ dependencies:
   - ros-humble-joint-state-publisher-gui
   # build tools
   - colcon-common-extensions=0.3
-  - setuptools<=58.2.0        # newer setuptools breaks/warns on colcon ament_python builds
+  - setuptools<80             # setuptools 80+ breaks colcon --symlink-install for Python packages
   - compilers=2
   - cmake=4
   - pkg-config=0.29
