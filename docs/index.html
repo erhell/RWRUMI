@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>RWRUMI · ORCA hand UMI</title>
-<meta name="description" content="RWRUMI: a hand-held Universal Manipulation Interface for the dexterous ORCA hand, recording joint, tactile and pose data. Team 4, Real World Robotics.">
+<title>RWRUMI · Team Guide</title>
+<meta name="description" content="RWRUMI team guide: repository structure, environment setup and workflow for Team 4, Real World Robotics (Task X: UMI for the ORCA hand v2).">
 <style>
   :root {
     --bg: #f7f6f3;
@@ -85,18 +85,6 @@
   h2 { font-size: 1.5rem; margin: 0 0 .3em; }
   .sub { color: var(--muted); margin: 0 0 24px; max-width: 70ch; }
 
-  .diagram { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; overflow-x: auto; }
-  .diagram svg { display: block; width: 100%; min-width: 640px; height: auto; }
-  .diagram .box { fill: var(--surface-2); stroke: var(--border); }
-  .diagram .box.accent { fill: var(--accent-soft); stroke: var(--accent); }
-  .diagram .box.tbd { fill: var(--tbd-soft); stroke: var(--tbd); stroke-dasharray: 5 4; }
-  .diagram .group { fill: none; stroke: var(--accent); stroke-dasharray: 6 5; }
-  .diagram text { fill: var(--text); font: 600 13px system-ui, sans-serif; }
-  .diagram text.small { fill: var(--muted); font: 400 11px ui-monospace, monospace; }
-  .diagram text.label { fill: var(--accent); font: 600 11px system-ui, sans-serif; letter-spacing: .06em; }
-  .diagram .edge { stroke: var(--muted); stroke-width: 1.5; fill: none; marker-end: url(#arrow); }
-  .diagram #arrow path { fill: var(--muted); }
-
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
   .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; }
   .card h3 { margin: 0 0 6px; font-size: 1.05rem; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
@@ -132,6 +120,9 @@
   ul.todo li { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; display: flex; gap: 10px; align-items: baseline; }
   ul.todo li::before { content: ""; flex: none; width: 12px; height: 12px; border: 2px solid var(--muted); border-radius: 3px; transform: translateY(2px); }
 
+  h3.step { font-size: 1.05rem; margin: 26px 0 10px; }
+  .rules { margin: 12px 0 0; padding-left: 20px; color: var(--muted); }
+  .rules li { margin: 4px 0; }
   footer { padding: 32px 0 48px; color: var(--muted); font-size: .88rem; border-top: 1px solid var(--border); }
 </style>
 </head>
@@ -141,12 +132,12 @@
   <div class="wrap">
     <a class="brand" href="#">RWRUMI</a>
     <nav>
-      <a href="#overview">Overview</a>
-      <a href="#subsystems">Subsystems</a>
-      <a href="#layout">Repository</a>
-      <a href="#stack">Stack</a>
       <a href="#setup">Setup</a>
-      <a href="#decisions">Open decisions</a>
+      <a href="#daily">Daily workflow</a>
+      <a href="#structure">Structure</a>
+      <a href="#adding">Adding things</a>
+      <a href="#conventions">Conventions</a>
+      <a href="#git">Git</a>
     </nav>
   </div>
 </header>
@@ -154,198 +145,140 @@
 <main class="wrap">
 
   <div class="hero">
-    <div class="eyebrow">Team 4 · Real World Robotics</div>
-    <h1>A Universal Manipulation Interface for the ORCA hand v2</h1>
-    <p class="lead">We're a team in the course Real World Robotics, which works with the ORCA hand. Our course task, Task X, is to build a UMI for the ORCA hand v2: a hand-held device that records joint angles, touch and pose while a person does a task, so the ORCA hand can learn it.</p>
-    <p class="lead" style="margin-top:12px">We develop our own ROS 2 packages for the UMI system. The ORCA hand v2 model is our starting point: we copy the files we need into our own package <code>rwrumi_description</code>.</p>
+    <div class="eyebrow">Team 4 · <a href="https://rwr.ethz.ch/">Real World Robotics</a> · Task X: UMI for the ORCA hand v2</div>
+    <h1>Team guide</h1>
+    <p class="lead">How our repository is structured, how to set up the environment, and how we add code and files.</p>
     <div class="chips">
-      <span class="chip">Ubuntu 26.04</span>
       <span class="chip">ROS 2 Humble · RoboStack</span>
       <span class="chip">mamba</span>
       <span class="chip">Python 3.12</span>
-      <span class="chip">based on ORCA v2 · right hand</span>
-      <span class="chip">rosbag2 / MCAP</span>
+      <span class="chip">Ubuntu 26.04</span>
     </div>
     <div class="btns">
-      <a class="btn primary" href="https://github.com/erhell/RWRUMI">View on GitHub</a>
-      <a class="btn ghost" href="#setup">Getting started</a>
+      <a class="btn primary" href="https://github.com/erhell/RWRUMI">Repository</a>
+      <a class="btn ghost" href="https://rwr.ethz.ch/">Course website</a>
     </div>
+    <p class="note" style="margin-top:28px">Status: environment ready (ROS 2 Humble). Next: <code>rwrumi_description</code> and the first packages.</p>
   </div>
 
-  <section id="overview">
-    <h2>System overview</h2>
-    <p class="sub">The UMI's robot model starts from the ORCA hand's kinematics. Our own sensors and pose estimation write into one time-synced recording, which is then exported into a training dataset.</p>
-    <div class="diagram" role="img" aria-label="Data flow: joint and tactile sensors on the UMI and a camera or tracker feed pose estimation and a recorder; our rwrumi_description model, based on ORCA v2, feeds robot_state_publisher; the recorder exports an HDF5 dataset for policy learning.">
-      <svg viewBox="0 0 960 360" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-            <path d="M0,0 L10,5 L0,10 z"/>
-          </marker>
-        </defs>
-
-        <rect class="group" x="16" y="20" width="200" height="200" rx="12"/>
-        <text class="label" x="32" y="42">HAND-HELD UMI</text>
-        <rect class="box" x="36" y="60" width="160" height="56" rx="8"/>
-        <text x="116" y="85" text-anchor="middle">Joint sensors</text>
-        <text class="small" x="116" y="103" text-anchor="middle">/umi/joint_states</text>
-        <rect class="box" x="36" y="140" width="160" height="56" rx="8"/>
-        <text x="116" y="165" text-anchor="middle">Tactile sensors</text>
-        <text class="small" x="116" y="183" text-anchor="middle">/umi/tactile</text>
-
-        <rect class="box tbd" x="36" y="260" width="160" height="56" rx="8"/>
-        <text x="116" y="285" text-anchor="middle">Camera / tracker</text>
-        <text class="small" x="116" y="303" text-anchor="middle">hardware TBD</text>
-
-        <rect class="box" x="290" y="20" width="190" height="56" rx="8"/>
-        <text x="385" y="45" text-anchor="middle">rwrumi_description</text>
-        <text class="small" x="385" y="63" text-anchor="middle">our URDF · based on ORCA v2</text>
-        <rect class="box" x="290" y="110" width="190" height="56" rx="8"/>
-        <text x="385" y="135" text-anchor="middle">robot_state_publisher</text>
-        <text class="small" x="385" y="153" text-anchor="middle">/tf hand links</text>
-        <rect class="box" x="290" y="260" width="190" height="56" rx="8"/>
-        <text x="385" y="285" text-anchor="middle">Pose estimation</text>
-        <text class="small" x="385" y="303" text-anchor="middle">global + relative · /tf</text>
-
-        <rect class="box accent" x="560" y="140" width="170" height="70" rx="8"/>
-        <text x="645" y="170" text-anchor="middle">Recorder</text>
-        <text class="small" x="645" y="190" text-anchor="middle">rosbag2 · MCAP</text>
-
-        <rect class="box" x="790" y="60" width="150" height="56" rx="8"/>
-        <text x="865" y="85" text-anchor="middle">Export</text>
-        <text class="small" x="865" y="103" text-anchor="middle">HDF5 episodes</text>
-        <rect class="box" x="790" y="240" width="150" height="56" rx="8"/>
-        <text x="865" y="265" text-anchor="middle">Policy learning</text>
-        <text class="small" x="865" y="283" text-anchor="middle">transfer to ORCA hand</text>
-
-        <path class="edge" d="M385 76 V108"/>
-        <path class="edge" d="M196 88 H240 V138 H288"/>
-        <path class="edge" d="M480 138 H520 V160 H558"/>
-        <path class="edge" d="M196 168 H240 V200 H520 V180 H558"/>
-        <path class="edge" d="M196 288 H288"/>
-        <path class="edge" d="M480 288 H520 V195 H558"/>
-        <path class="edge" d="M730 165 H760 V88 H788"/>
-        <path class="edge" d="M865 116 V238"/>
-      </svg>
-    </div>
-  </section>
-
-  <section id="subsystems">
-    <h2>Subsystems</h2>
-    <p class="sub">Each subsystem is its own ROS 2 package. You can develop, test and launch each one alone.</p>
-    <div class="grid">
-      <div class="card">
-        <h3>Robot description <span class="pill planned">planned</span></h3>
-        <p>Our own URDF and meshes of the UMI, derived from ORCA v2 with clean joint names and our own parts. It's the one source of truth for joint names, limits and frames.</p>
-        <div class="meta"><code>src/rwrumi_description</code> · based on ORCA v2</div>
-      </div>
-      <div class="card">
-        <h3>Joint sensing <span class="pill planned">planned</span></h3>
-        <p>Reads our own joint sensors and publishes <code>sensor_msgs/JointState</code>, with joint names mapped to the URDF.</p>
-        <div class="meta"><code>src/rwrumi_joint_sensors</code></div>
-      </div>
-      <div class="card">
-        <h3>Tactile sensing <span class="pill planned">planned</span></h3>
-        <p>Reads our own tactile sensors and publishes a custom tactile array message with hardware timestamps.</p>
-        <div class="meta"><code>src/rwrumi_tactile</code> · msgs in <code>rwrumi_interfaces</code></div>
-      </div>
-      <div class="card">
-        <h3>Pose estimation <span class="pill tbd">hardware TBD</span></h3>
-        <p>Estimates the global pose of the UMI in the world frame and the relative pose between the UMI and the object. Both go out on <code>/tf</code>.</p>
-        <div class="meta"><code>src/rwrumi_pose</code></div>
-      </div>
-      <div class="card">
-        <h3>Recording <span class="pill planned">planned</span></h3>
-        <p>Records all streams, time-synced, into rosbag2 (MCAP), one bag per demonstration episode.</p>
-        <div class="meta"><code>src/rwrumi_recorder</code></div>
-      </div>
-      <div class="card">
-        <h3>Dataset export <span class="pill planned">planned</span></h3>
-        <p>Converts the recorded bags into per-episode HDF5 files for policy learning.</p>
-        <div class="meta"><code>src/rwrumi_recorder</code></div>
-      </div>
-    </div>
-  </section>
-
-  <section id="layout">
-    <h2>Repository layout</h2>
-    <p class="sub">What is where. Planned entries are added as the project grows.</p>
-    <div class="tree">
-      <div class="row"><span class="path">RWRUMI/</span><span class="desc"></span><span></span></div>
-      <div class="row"><span class="path">├── README.md</span><span class="desc">Project overview</span><span class="pill done">exists</span></div>
-      <div class="row"><span class="path">├── docs/index.html</span><span class="desc">This page (GitHub Pages)</span><span class="pill done">exists</span></div>
-      <div class="row"><span class="path">├── environment.yml</span><span class="desc">Environment: ROS 2 Humble + all dependencies (RoboStack)</span><span class="pill done">exists</span></div>
-      <div class="row"><span class="path">├── .gitignore</span><span class="desc">Keeps build output out of git</span><span class="pill done">exists</span></div>
-      <div class="row"><span class="path">└── src/</span><span class="desc">ROS 2 workspace sources</span><span class="pill planned">planned</span></div>
-      <div class="row"><span class="path">    ├── rwrumi_description/</span><span class="desc">Our robot model, based on ORCA v2</span><span class="pill planned">planned</span></div>
-      <div class="row"><span class="path">    │   ├── urdf/</span><span class="desc">UMI URDF/xacro: ORCA hand + our parts, clean names</span><span class="pill planned">planned</span></div>
-      <div class="row"><span class="path">    │   ├── meshes/</span><span class="desc">STL meshes copied from ORCA, plus our own</span><span class="pill planned">planned</span></div>
-      <div class="row"><span class="path">    │   ├── LICENSE.orca</span><span class="desc">ORCA's MIT license for the copied files</span><span class="pill planned">planned</span></div>
-      <div class="row"><span class="path">    │   └── SOURCE.md</span><span class="desc">Origin of the copied files and all our changes</span><span class="pill planned">planned</span></div>
-      <div class="row"><span class="path">    ├── rwrumi_interfaces/</span><span class="desc">Custom messages</span><span class="pill planned">planned</span></div>
-      <div class="row"><span class="path">    ├── rwrumi_joint_sensors/</span><span class="desc">Joint sensor driver</span><span class="pill planned">planned</span></div>
-      <div class="row"><span class="path">    ├── rwrumi_tactile/</span><span class="desc">Tactile sensor driver</span><span class="pill planned">planned</span></div>
-      <div class="row"><span class="path">    ├── rwrumi_pose/</span><span class="desc">Global + relative pose estimation</span><span class="pill planned">planned</span></div>
-      <div class="row"><span class="path">    ├── rwrumi_recorder/</span><span class="desc">Recording + bag → HDF5 export</span><span class="pill planned">planned</span></div>
-      <div class="row"><span class="path">    └── rwrumi_bringup/</span><span class="desc">Launch files, configs, RViz</span><span class="pill planned">planned</span></div>
-    </div>
-    <p class="sub" style="margin-top:16px">Conventions (proposed): packages are prefixed <code>rwrumi_</code>, all topics live under <code>/umi</code>, and frames follow REP 105 (<code>world</code> → <code>umi_base</code> → hand links from <code>rwrumi_description</code>). Files from other packages are always referenced by package name (<code>package://…</code>, <code>FindPackageShare</code>), never by path.</p>
-  </section>
-
-  <section id="stack">
-    <h2>Tech stack</h2>
-    <div class="table-wrap">
-      <table>
-        <tr><th>Layer</th><th>Choice</th></tr>
-        <tr><td>OS</td><td>Ubuntu 26.04 LTS</td></tr>
-        <tr><td>Middleware</td><td>ROS 2 Humble, installed through <a href="https://robostack.github.io">RoboStack</a> (conda packages), not apt</td></tr>
-        <tr><td>Environment</td><td><code>mamba</code> (or <code>micromamba</code>) with one shared <code>environment.yml</code> (ROS, Python and system libraries)</td></tr>
-        <tr><td>Language</td><td>Python 3.12 (<code>rclpy</code>)</td></tr>
-        <tr><td>Robot model</td><td>Own package <code>rwrumi_description</code>, based on the ORCA v2 right hand (MIT)</td></tr>
-        <tr><td>Recording</td><td><code>rosbag2</code> with MCAP storage</td></tr>
-        <tr><td>Dataset</td><td>HDF5 (<code>h5py</code>)</td></tr>
-        <tr><td>Pose estimation</td><td><span class="pill tbd">TBD</span> depends on the camera / tracker choice</td></tr>
-      </table>
-    </div>
-  </section>
-
   <section id="setup">
-    <h2>Getting started</h2>
-<pre><span class="c"># 1. Install mamba (once per machine): Miniforge or micromamba – no system ROS install needed</span>
-<span class="c">#    https://github.com/conda-forge/miniforge   (micromamba users: replace `mamba` with `micromamba`)</span>
+    <h2>1. Setup (once per machine)</h2>
+    <p class="sub">ROS 2 Humble from RoboStack inside a <code>mamba</code> environment. Don't install ROS from apt, and don't use Docker.</p>
+<pre><span class="c"># 1. Install mamba: Miniforge (github.com/conda-forge/miniforge) or micromamba</span>
+<span class="c">#    (micromamba users: replace `mamba` with `micromamba` everywhere)</span>
 
 <span class="c"># 2. Clone</span>
 git clone https://github.com/erhell/RWRUMI.git
 cd RWRUMI
 
-<span class="c"># 3. Create the environment (ROS 2 Humble + all dependencies)</span>
+<span class="c"># 3. Create the environment from environment.yml</span>
 mamba env create -f environment.yml
+
+<span class="c"># 4. Build</span>
 mamba activate rwrumi
-export ROS_DOMAIN_ID=4
+colcon build --symlink-install</pre>
+  </section>
 
-<span class="c"># 4. Build and use (from the repo root)</span>
-colcon build --symlink-install
-source install/setup.zsh   <span class="c"># or install/setup.bash</span></pre>
+  <section id="daily">
+    <h2>2. Daily workflow</h2>
+<pre>cd RWRUMI
+mamba activate rwrumi
+export ROS_DOMAIN_ID=4                                <span class="c"># our team's ID on the lab network</span>
+git pull
+mamba env update -f environment.yml --prune           <span class="c"># only if environment.yml changed</span>
+colcon build --symlink-install                        <span class="c"># always from the repo root</span>
+source install/setup.zsh                              <span class="c"># or install/setup.bash</span></pre>
+  </section>
 
-    <h3 style="margin:28px 0 10px">Same environment for everyone, without Docker</h3>
+  <section id="structure">
+    <h2>3. Repository structure</h2>
+    <div class="tree">
+      <div class="row"><span class="path">RWRUMI/</span><span class="desc"></span><span></span></div>
+      <div class="row"><span class="path">├── README.md</span><span class="desc">This guide</span><span class="pill done">exists</span></div>
+      <div class="row"><span class="path">├── docs/index.html</span><span class="desc">This page, same content as the README</span><span class="pill done">exists</span></div>
+      <div class="row"><span class="path">├── environment.yml</span><span class="desc">The shared environment (ROS 2 + all dependencies)</span><span class="pill done">exists</span></div>
+      <div class="row"><span class="path">├── .gitignore</span><span class="desc"></span><span class="pill done">exists</span></div>
+      <div class="row"><span class="path">└── src/</span><span class="desc">All ROS 2 packages</span><span class="pill planned">planned</span></div>
+      <div class="row"><span class="path">    ├── rwrumi_description/</span><span class="desc">Robot model: URDF, meshes (incl. files copied from ORCA)</span><span class="pill planned">planned</span></div>
+      <div class="row"><span class="path">    │   ├── urdf/</span><span class="desc"></span><span></span></div>
+      <div class="row"><span class="path">    │   ├── meshes/</span><span class="desc"></span><span></span></div>
+      <div class="row"><span class="path">    │   ├── LICENSE.orca</span><span class="desc">ORCA's license for the copied files</span><span></span></div>
+      <div class="row"><span class="path">    │   └── SOURCE.md</span><span class="desc">Where copied files come from + what we changed</span><span></span></div>
+      <div class="row"><span class="path">    ├── rwrumi_interfaces/</span><span class="desc">Custom messages (e.g. TactileArray.msg)</span><span class="pill planned">planned</span></div>
+      <div class="row"><span class="path">    ├── rwrumi_joint_sensors/</span><span class="desc">Joint sensor driver</span><span class="pill planned">planned</span></div>
+      <div class="row"><span class="path">    ├── rwrumi_tactile/</span><span class="desc">Tactile sensor driver</span><span class="pill planned">planned</span></div>
+      <div class="row"><span class="path">    ├── rwrumi_pose/</span><span class="desc">Global + relative pose estimation</span><span class="pill tbd">camera TBD</span></div>
+      <div class="row"><span class="path">    ├── rwrumi_recorder/</span><span class="desc">Recording + bag → HDF5 export</span><span class="pill planned">planned</span></div>
+      <div class="row"><span class="path">    └── rwrumi_bringup/</span><span class="desc">Launch files, configs, RViz setup</span><span class="pill planned">planned</span></div>
+    </div>
+  </section>
+
+  <section id="adding">
+    <h2>4. How we add things</h2>
+
+    <h3 class="step">A new ROS package</h3>
+<pre>cd src
+ros2 pkg create --build-type ament_python rwrumi_&lt;name&gt;   <span class="c"># Python nodes</span>
+ros2 pkg create --build-type ament_cmake  rwrumi_&lt;name&gt;   <span class="c"># messages, URDF/mesh-only packages</span></pre>
+    <ul class="rules">
+      <li>Every package lives directly in <code>src/</code> and starts with <code>rwrumi_</code>.</li>
+      <li>List everything it uses in its <code>package.xml</code> (<code>&lt;depend&gt;</code>, <code>&lt;exec_depend&gt;</code>).</li>
+      <li>Add the package to the structure above in the same pull request.</li>
+    </ul>
+
+    <h3 class="step">A new dependency (library, ROS package, tool)</h3>
+    <ul class="rules">
+      <li>Add it to <code>environment.yml</code> (RoboStack / conda-forge name, e.g. <code>ros-humble-&lt;name&gt;</code>; pip-only packages under a <code>pip:</code> section).</li>
+      <li>Run <code>mamba env update -f environment.yml --prune</code> and commit the file.</li>
+      <li>Never <code>mamba install</code> or <code>pip install</code> by hand: your teammates wouldn't get it.</li>
+    </ul>
+
+    <h3 class="step">Files from ORCA</h3>
+    <ul class="rules">
+      <li>Copy only the files you need from <a href="https://github.com/orcahand/orcahand_description">orcahand/orcahand_description</a> into <code>src/rwrumi_description/</code> (<code>urdf/</code> or <code>meshes/</code>). No submodule.</li>
+      <li>Note the source (repo, commit, path) and every change you make in <code>SOURCE.md</code>.</li>
+      <li>Keep <code>LICENSE.orca</code> next to the copied files (ORCA is MIT-licensed).</li>
+      <li>Current source version: commit <code>b9b349a2</code>, folder <code>v2/</code>, right hand.</li>
+    </ul>
+
+    <h3 class="step">Referencing files in code</h3>
+    <ul class="rules">
+      <li>Always by package name, never by path: <code>package://rwrumi_description/meshes/…</code> in URDF, <code>FindPackageShare('rwrumi_description')</code> in launch files, <code>get_package_share_directory('rwrumi_description')</code> in Python.</li>
+    </ul>
+  </section>
+
+  <section id="conventions">
+    <h2>5. Conventions</h2>
     <div class="table-wrap">
       <table>
-        <tr><th>Layer</th><th>Pinned by</th><th>Update after <code>git pull</code></th></tr>
-        <tr><td>ROS 2, Python, system libraries</td><td><code>environment.yml</code> (versions pinned)</td><td><code>mamba env update -f environment.yml --prune</code></td></tr>
-        <tr><td>Robot model (incl. ORCA-based files)</td><td>committed in <code>src/rwrumi_description</code></td><td>nothing extra, it comes with <code>git pull</code></td></tr>
+        <tr><th>What</th><th>Rule</th></tr>
+        <tr><td>Packages</td><td><code>rwrumi_&lt;name&gt;</code>, all in <code>src/</code></td></tr>
+        <tr><td>Topics</td><td>under <code>/umi</code>, e.g. <code>/umi/joint_states</code>, <code>/umi/tactile</code></td></tr>
+        <tr><td>Frames</td><td><a href="https://www.ros.org/reps/rep-0105.html">REP 105</a>: <code>world</code> → <code>umi_base</code> → hand links</td></tr>
+        <tr><td>Joint / link names</td><td>readable names (<code>index_mcp</code>, …), not ORCA's generated ones</td></tr>
+        <tr><td>ROS network</td><td><code>ROS_DOMAIN_ID=4</code></td></tr>
+        <tr><td>Recordings</td><td><code>rosbag2</code> with MCAP (<code>ros2 bag record -s mcap</code>)</td></tr>
       </table>
     </div>
-    <p class="sub" style="margin-top:12px">Add dependencies to <code>environment.yml</code> (never with a bare <code>install</code>), run the update command, and commit the file.</p>
+  </section>
+
+  <section id="git">
+    <h2>6. Git workflow</h2>
+    <ul class="rules">
+      <li><code>main</code> only changes through pull requests. Work on a branch: <code>feature/&lt;topic&gt;</code> or <code>setup/&lt;topic&gt;</code>.</li>
+      <li>Never commit <code>build/</code>, <code>install/</code> or <code>log/</code> (already in <code>.gitignore</code>).</li>
+      <li>Commit <code>environment.yml</code> whenever you change it.</li>
+      <li>If your PR adds, moves or removes a package, or settles an open decision, update the README and this page in the same PR.</li>
+    </ul>
   </section>
 
   <section id="decisions">
     <h2>Open decisions</h2>
     <ul class="todo">
-      <li>Camera / tracker for global pose estimation</li>
-      <li>Method for relative UMI ↔ object pose</li>
-      <li>Joint sensor hardware and interface (serial, I²C, …)</li>
+      <li>Camera / tracker for pose estimation</li>
+      <li>Joint sensor hardware and interface</li>
       <li>Tactile sensor hardware and message format</li>
-      <li>Dataset format details (episode structure, sampling rate)</li>
-      <li>License for our own code</li>
+      <li>Dataset format (episode structure, sampling rate)</li>
     </ul>
   </section>
 
@@ -353,7 +286,11 @@ source install/setup.zsh   <span class="c"># or install/setup.bash</span></pre>
 
 <footer>
   <div class="wrap">
-    Built on the open-source <a href="https://orcahand.com">ORCA hand</a> (MIT) and inspired by Chi et al., <em>Universal Manipulation Interface</em>, RSS 2024. ·
+    <a href="https://rwr.ethz.ch/">Real World Robotics</a> ·
+    <a href="https://orcahand.com">ORCA hand</a> ·
+    <a href="https://github.com/orcahand/orcahand_description">orcahand_description</a> (MIT) ·
+    <a href="https://robostack.github.io">RoboStack</a> ·
+    <a href="https://docs.ros.org/en/humble/">ROS 2 Humble docs</a> ·
     <a href="https://github.com/erhell/RWRUMI">github.com/erhell/RWRUMI</a>
   </div>
 </footer>
