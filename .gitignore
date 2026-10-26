@@ -1,0 +1,11 @@
+# colcon workspace output
+build/
+install/
+log/
+
+# Python
+__pycache__/
+*.pyc
+
+# old pixi environment (delete the folder with: rm -rf .pixi)
+.pixi/

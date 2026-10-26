@@ -63,8 +63,8 @@ RWRUMI/
 ├── README.md                     project overview (this file)
 ├── docs/                         GitHub Pages project site
 │   └── index.html
-├── pixi.toml                     environment: ROS 2 + all dependencies (edited by hand)  [planned]
-├── pixi.lock                     exact versions for everyone (generated, committed)      [planned]
+├── environment.yml               environment: ROS 2 Jazzy + all dependencies (RoboStack)
+├── .gitignore
 └── src/                          ROS 2 workspace sources                                 [planned]
     ├── external/
     │   └── orcahand_description/ ORCA URDF/MJCF + STL meshes (git submodule)
@@ -88,7 +88,7 @@ under the `/umi` namespace; frames follow [REP 105](https://www.ros.org/reps/rep
 |---|---|
 | OS | Ubuntu 26.04 LTS |
 | Middleware | ROS 2 **Jazzy**, installed through [RoboStack](https://robostack.github.io) (conda packages), not apt |
-| Environment | [pixi](https://pixi.sh): one `pixi.toml` + `pixi.lock` pins ROS, Python and system libraries for everyone |
+| Environment | `mamba` / `micromamba` with one shared `environment.yml` (ROS, Python and system libraries) |
 | Language | Python 3 (`rclpy`) |
 | Hand model | [`orcahand/orcahand_description`](https://github.com/orcahand/orcahand_description) (MIT), v2 right hand |
 | Recording | `rosbag2` with the MCAP storage plugin |
@@ -101,22 +101,25 @@ under the `/umi` namespace; frames follow [REP 105](https://www.ros.org/reps/rep
 
 > The workspace is not set up yet. These are the intended steps once it is.
 
-No system ROS install is needed. ROS 2 comes inside the project environment.
+No system ROS install is needed. ROS 2 comes inside a conda environment from
+[RoboStack](https://robostack.github.io).
 
 ```bash
-# 1. Install pixi (once per machine)
-curl -fsSL https://pixi.sh/install.sh | sh
+# 1. Install micromamba or Miniforge (once per machine), e.g.
+"${SHELL}" <(curl -L micro.mamba.pm/install.sh)
+# (with Miniforge, use `mamba` instead of `micromamba` in the commands below)
 
 # 2. Clone including the ORCA submodule
 git clone --recursive https://github.com/erhell/RWRUMI.git
 cd RWRUMI
 # (already cloned without --recursive?)  git submodule update --init --recursive
 
-# 3. Install the exact environment from pixi.lock (ROS 2 Jazzy + all dependencies)
-pixi install
+# 3. Create the environment (ROS 2 Jazzy + all dependencies)
+micromamba create -f environment.yml
+micromamba activate rwrumi
+export ROS_DOMAIN_ID=4             # only talk to our team's ROS nodes on the lab network
 
 # 4. Build and use
-pixi shell                         # enter the environment
 colcon build --symlink-install
 source install/setup.zsh           # or install/setup.bash, depending on your shell
 ```
@@ -125,12 +128,13 @@ source install/setup.zsh           # or install/setup.bash, depending on your sh
 
 | Layer | How it is pinned | How to update after `git pull` |
 |---|---|---|
-| ROS 2, Python and system libraries | `pixi.lock` (exact versions, committed) | `pixi install` (`pixi run` / `pixi shell` also sync automatically) |
+| ROS 2, Python and system libraries | `environment.yml` (versions pinned) | `micromamba env update -f environment.yml --prune` |
 | ORCA files | submodule pinned to one commit | `git submodule update --init --recursive` |
 
-To add a dependency, run `pixi add <package>` (conda-forge / RoboStack) or
-`pixi add --pypi <package>` (pip only), then commit `pixi.toml` and `pixi.lock` together.
-Don't install ROS from apt as well, so the two installs never get mixed up.
+To add a dependency, add it to `environment.yml` (conda-forge / RoboStack name, or under a
+`pip:` section if it only exists on PyPI), run the update command and commit the file.
+Don't `micromamba install` or `pip install` packages by hand, and don't install ROS from
+apt as well, so the two installs never get mixed up.
 
 ---
 
