@@ -17,8 +17,9 @@ a separate sensing system records:
 Everything is time-stamped and stored as ROS 2 bags, then exported into a dataset
 for learning manipulation policies on the real ORCA hand.
 
-> **Status:** project setup. The repository layout below is the *planned* structure;
-> each entry shows whether it already exists.
+> **Status:** development environment ready (ROS 2 Jazzy via RoboStack). Next: ORCA
+> submodule and the first ROS packages. The repository layout below is the *planned*
+> structure; each entry shows whether it already exists.
 
 ---
 
