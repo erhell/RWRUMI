@@ -159,7 +159,7 @@
     <p class="lead">A hand-held device that uses the ORCA hand's kinematics, so people can show manipulation tasks by hand. It records joint angles, touch and pose so the robot can learn the same tasks.</p>
     <div class="chips">
       <span class="chip">Ubuntu 26.04</span>
-      <span class="chip">ROS 2 Jazzy · RoboStack</span>
+      <span class="chip">ROS 2 Humble · RoboStack</span>
       <span class="chip">micromamba</span>
       <span class="chip">Python</span>
       <span class="chip">ORCA v2 · right hand</span>
@@ -272,7 +272,7 @@
       <div class="row"><span class="path">RWRUMI/</span><span class="desc"></span><span></span></div>
       <div class="row"><span class="path">├── README.md</span><span class="desc">Project overview</span><span class="pill done">exists</span></div>
       <div class="row"><span class="path">├── docs/index.html</span><span class="desc">This page (GitHub Pages)</span><span class="pill done">exists</span></div>
-      <div class="row"><span class="path">├── environment.yml</span><span class="desc">Environment: ROS 2 Jazzy + all dependencies (RoboStack)</span><span class="pill done">exists</span></div>
+      <div class="row"><span class="path">├── environment.yml</span><span class="desc">Environment: ROS 2 Humble + all dependencies (RoboStack)</span><span class="pill done">exists</span></div>
       <div class="row"><span class="path">├── .gitignore</span><span class="desc">Keeps build output out of git</span><span class="pill done">exists</span></div>
       <div class="row"><span class="path">└── src/</span><span class="desc">ROS 2 workspace sources</span><span class="pill planned">planned</span></div>
       <div class="row"><span class="path">    ├── external/orcahand_description/</span><span class="desc">ORCA URDF/MJCF + meshes (submodule)</span><span class="pill planned">planned</span></div>
@@ -292,7 +292,7 @@
       <table>
         <tr><th>Layer</th><th>Choice</th></tr>
         <tr><td>OS</td><td>Ubuntu 26.04 LTS</td></tr>
-        <tr><td>Middleware</td><td>ROS 2 Jazzy, installed through <a href="https://robostack.github.io">RoboStack</a> (conda packages), not apt</td></tr>
+        <tr><td>Middleware</td><td>ROS 2 Humble, installed through <a href="https://robostack.github.io">RoboStack</a> (conda packages), not apt</td></tr>
         <tr><td>Environment</td><td><code>mamba</code> / <code>micromamba</code> with one shared <code>environment.yml</code> (ROS, Python and system libraries)</td></tr>
         <tr><td>Language</td><td>Python 3 (<code>rclpy</code>)</td></tr>
         <tr><td>Hand model</td><td><a href="https://github.com/orcahand/orcahand_description">orcahand/orcahand_description</a> (MIT), v2 right hand</td></tr>
@@ -314,7 +314,7 @@
 git clone --recursive https://github.com/erhell/RWRUMI.git
 cd RWRUMI
 
-<span class="c"># 3. Create the environment (ROS 2 Jazzy + all dependencies)</span>
+<span class="c"># 3. Create the environment (ROS 2 Humble + all dependencies)</span>
 micromamba create -f environment.yml
 micromamba activate rwrumi
 export ROS_DOMAIN_ID=4

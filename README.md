@@ -17,7 +17,7 @@ a separate sensing system records:
 Everything is time-stamped and stored as ROS 2 bags, then exported into a dataset
 for learning manipulation policies on the real ORCA hand.
 
-> **Status:** development environment ready (ROS 2 Jazzy via RoboStack). Next: ORCA
+> **Status:** development environment ready (ROS 2 Humble via RoboStack). Next: ORCA
 > submodule and the first ROS packages. The repository layout below is the *planned*
 > structure; each entry shows whether it already exists.
 
@@ -64,7 +64,7 @@ RWRUMI/
 ├── README.md                     project overview (this file)
 ├── docs/                         GitHub Pages project site
 │   └── index.html
-├── environment.yml               environment: ROS 2 Jazzy + all dependencies (RoboStack)
+├── environment.yml               environment: ROS 2 Humble + all dependencies (RoboStack)
 ├── .gitignore
 └── src/                          ROS 2 workspace sources                                 [planned]
     ├── external/
@@ -88,7 +88,7 @@ under the `/umi` namespace; frames follow [REP 105](https://www.ros.org/reps/rep
 | | |
 |---|---|
 | OS | Ubuntu 26.04 LTS |
-| Middleware | ROS 2 **Jazzy**, installed through [RoboStack](https://robostack.github.io) (conda packages), not apt |
+| Middleware | ROS 2 **Humble**, installed through [RoboStack](https://robostack.github.io) (conda packages), not apt |
 | Environment | `mamba` / `micromamba` with one shared `environment.yml` (ROS, Python and system libraries) |
 | Language | Python 3 (`rclpy`) |
 | Hand model | [`orcahand/orcahand_description`](https://github.com/orcahand/orcahand_description) (MIT), v2 right hand |
@@ -115,7 +115,7 @@ git clone --recursive https://github.com/erhell/RWRUMI.git
 cd RWRUMI
 # (already cloned without --recursive?)  git submodule update --init --recursive
 
-# 3. Create the environment (ROS 2 Jazzy + all dependencies)
+# 3. Create the environment (ROS 2 Humble + all dependencies)
 micromamba create -f environment.yml
 micromamba activate rwrumi
 export ROS_DOMAIN_ID=4             # only talk to our team's ROS nodes on the lab network
