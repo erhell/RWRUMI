@@ -1,0 +1,23 @@
+# RWRUMI development environment: ROS 2 Jazzy from RoboStack.
+#
+# Create:  mamba env create -f environment.yml        (or: micromamba create -f environment.yml)
+# Update:  mamba env update -f environment.yml --prune (run after every git pull that changes this file)
+# Use:     mamba activate rwrumi
+#
+# Add new dependencies HERE (not with a bare `mamba install` / `pip install`),
+# so every collaborator gets them on the next update.
+name: rwrumi
+channels:
+  - robostack-jazzy
+  - conda-forge
+dependencies:
+  # ROS 2
+  - ros-jazzy-desktop=0.11
+  # build tools
+  - colcon-common-extensions=0.3
+  - setuptools<=58.2.0        # newer setuptools breaks/warns on colcon ament_python builds
+  - compilers=2
+  - cmake=4
+  - pkg-config=0.29
+  - make=4
+  - ninja=1
