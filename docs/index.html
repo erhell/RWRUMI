@@ -159,7 +159,8 @@
     <p class="lead">A hand-held device that uses the ORCA hand's kinematics, so people can show manipulation tasks by hand. It records joint angles, touch and pose so the robot can learn the same tasks.</p>
     <div class="chips">
       <span class="chip">Ubuntu 26.04</span>
-      <span class="chip">ROS 2 Lyrical</span>
+      <span class="chip">ROS 2 Jazzy · RoboStack</span>
+      <span class="chip">pixi</span>
       <span class="chip">Python</span>
       <span class="chip">ORCA v2 · right hand</span>
       <span class="chip">rosbag2 / MCAP</span>
@@ -271,9 +272,8 @@
       <div class="row"><span class="path">RWRUMI/</span><span class="desc"></span><span></span></div>
       <div class="row"><span class="path">├── README.md</span><span class="desc">Project overview</span><span class="pill done">exists</span></div>
       <div class="row"><span class="path">├── docs/index.html</span><span class="desc">This page (GitHub Pages)</span><span class="pill done">exists</span></div>
-      <div class="row"><span class="path">├── requirements.in</span><span class="desc">Top-level Python deps, edited by hand</span><span class="pill planned">planned</span></div>
-      <div class="row"><span class="path">├── requirements.txt</span><span class="desc">Locked exact versions, generated</span><span class="pill planned">planned</span></div>
-      <div class="row"><span class="path">├── scripts/setup_env.sh</span><span class="desc">One-command setup / update</span><span class="pill planned">planned</span></div>
+      <div class="row"><span class="path">├── pixi.toml</span><span class="desc">Environment: ROS 2 + all dependencies, edited by hand</span><span class="pill planned">planned</span></div>
+      <div class="row"><span class="path">├── pixi.lock</span><span class="desc">Exact versions for everyone, generated and committed</span><span class="pill planned">planned</span></div>
       <div class="row"><span class="path">└── src/</span><span class="desc">ROS 2 workspace sources</span><span class="pill planned">planned</span></div>
       <div class="row"><span class="path">    ├── external/orcahand_description/</span><span class="desc">ORCA URDF/MJCF + meshes (submodule)</span><span class="pill planned">planned</span></div>
       <div class="row"><span class="path">    ├── rwrumi_interfaces/</span><span class="desc">Custom messages</span><span class="pill planned">planned</span></div>
@@ -292,7 +292,8 @@
       <table>
         <tr><th>Layer</th><th>Choice</th></tr>
         <tr><td>OS</td><td>Ubuntu 26.04 LTS</td></tr>
-        <tr><td>Middleware</td><td>ROS 2 Lyrical Luth (the only ROS 2 distro released for 26.04)</td></tr>
+        <tr><td>Middleware</td><td>ROS 2 Jazzy, installed through <a href="https://robostack.github.io">RoboStack</a> (conda packages), not apt</td></tr>
+        <tr><td>Environment</td><td><a href="https://pixi.sh">pixi</a>: <code>pixi.toml</code> + <code>pixi.lock</code> pin ROS, Python and system libraries for everyone</td></tr>
         <tr><td>Language</td><td>Python 3 (<code>rclpy</code>)</td></tr>
         <tr><td>Hand model</td><td><a href="https://github.com/orcahand/orcahand_description">orcahand/orcahand_description</a> (MIT), v2 right hand</td></tr>
         <tr><td>Recording</td><td><code>rosbag2</code> with MCAP storage</td></tr>
@@ -305,35 +306,30 @@
   <section id="setup">
     <h2>Getting started</h2>
     <p class="note">The workspace isn't set up yet. These are the intended steps once it is.</p>
-<pre><span class="c"># 1. Clone including the ORCA submodule</span>
+<pre><span class="c"># 1. Install pixi (once per machine) – no system ROS install needed</span>
+curl -fsSL https://pixi.sh/install.sh | sh
+
+<span class="c"># 2. Clone including the ORCA submodule</span>
 git clone --recursive https://github.com/erhell/RWRUMI.git
 cd RWRUMI
 
-<span class="c"># 2. ROS 2 Lyrical installed and sourced</span>
-source /opt/ros/lyrical/setup.bash
+<span class="c"># 3. Exact environment from pixi.lock (ROS 2 Jazzy + all dependencies)</span>
+pixi install
 
-<span class="c"># 3. System + ROS dependencies from every package.xml</span>
-rosdep install --from-paths src --ignore-src -y
-
-<span class="c"># 4. Python dependencies</span>
-python3 -m venv --system-site-packages .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-
-<span class="c"># 5. Build</span>
+<span class="c"># 4. Build and use</span>
+pixi shell
 colcon build --symlink-install
-source install/setup.bash</pre>
+source install/setup.zsh   <span class="c"># or install/setup.bash</span></pre>
 
     <h3 style="margin:28px 0 10px">Same environment for everyone, without Docker</h3>
     <div class="table-wrap">
       <table>
         <tr><th>Layer</th><th>Pinned by</th><th>Update after <code>git pull</code></th></tr>
-        <tr><td>OS + ROS</td><td>Ubuntu 26.04 + ROS 2 Lyrical</td><td><code>sudo apt update &amp;&amp; sudo apt upgrade</code></td></tr>
-        <tr><td>ROS / apt deps</td><td>each <code>package.xml</code></td><td><code>rosdep install --from-paths src --ignore-src -y</code></td></tr>
-        <tr><td>Python deps</td><td><code>requirements.txt</code> (exact versions)</td><td><code>pip install -r requirements.txt</code></td></tr>
+        <tr><td>ROS 2, Python, system libraries</td><td><code>pixi.lock</code> (exact versions, committed)</td><td><code>pixi install</code> (also automatic with <code>pixi run</code> / <code>pixi shell</code>)</td></tr>
         <tr><td>ORCA files</td><td>submodule commit</td><td><code>git submodule update --init --recursive</code></td></tr>
       </table>
     </div>
+    <p class="sub" style="margin-top:12px">Add dependencies with <code>pixi add &lt;pkg&gt;</code> (or <code>pixi add --pypi &lt;pkg&gt;</code>), then commit <code>pixi.toml</code> and <code>pixi.lock</code> together.</p>
   </section>
 
   <section id="decisions">

@@ -63,11 +63,9 @@ RWRUMI/
 ├── README.md                     project overview (this file)
 ├── docs/                         GitHub Pages project site
 │   └── index.html
-├── requirements.in               top-level Python dependencies (edited by hand)   [planned]
-├── requirements.txt              locked, exact versions (generated)               [planned]
-├── scripts/
-│   └── setup_env.sh              one-command environment setup / update           [planned]
-└── src/                          ROS 2 workspace sources                          [planned]
+├── pixi.toml                     environment: ROS 2 + all dependencies (edited by hand)  [planned]
+├── pixi.lock                     exact versions for everyone (generated, committed)      [planned]
+└── src/                          ROS 2 workspace sources                                 [planned]
     ├── external/
     │   └── orcahand_description/ ORCA URDF/MJCF + STL meshes (git submodule)
     ├── rwrumi_interfaces/        custom messages (e.g. TactileArray.msg)
@@ -89,7 +87,8 @@ under the `/umi` namespace; frames follow [REP 105](https://www.ros.org/reps/rep
 | | |
 |---|---|
 | OS | Ubuntu 26.04 LTS |
-| Middleware | ROS 2 **Lyrical Luth** (the only ROS 2 distro released for 26.04) |
+| Middleware | ROS 2 **Jazzy**, installed through [RoboStack](https://robostack.github.io) (conda packages), not apt |
+| Environment | [pixi](https://pixi.sh): one `pixi.toml` + `pixi.lock` pins ROS, Python and system libraries for everyone |
 | Language | Python 3 (`rclpy`) |
 | Hand model | [`orcahand/orcahand_description`](https://github.com/orcahand/orcahand_description) (MIT), v2 right hand |
 | Recording | `rosbag2` with the MCAP storage plugin |
@@ -102,38 +101,36 @@ under the `/umi` namespace; frames follow [REP 105](https://www.ros.org/reps/rep
 
 > The workspace is not set up yet. These are the intended steps once it is.
 
+No system ROS install is needed. ROS 2 comes inside the project environment.
+
 ```bash
-# 1. Clone including the ORCA submodule
+# 1. Install pixi (once per machine)
+curl -fsSL https://pixi.sh/install.sh | sh
+
+# 2. Clone including the ORCA submodule
 git clone --recursive https://github.com/erhell/RWRUMI.git
 cd RWRUMI
 # (already cloned without --recursive?)  git submodule update --init --recursive
 
-# 2. ROS 2 Lyrical must be installed: https://docs.ros.org/en/lyrical/Installation.html
-source /opt/ros/lyrical/setup.bash
+# 3. Install the exact environment from pixi.lock (ROS 2 Jazzy + all dependencies)
+pixi install
 
-# 3. System + ROS dependencies declared in each package.xml
-rosdep install --from-paths src --ignore-src -y
-
-# 4. Python dependencies (venv that can still see ROS's Python packages)
-python3 -m venv --system-site-packages .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-
-# 5. Build
+# 4. Build and use
+pixi shell                         # enter the environment
 colcon build --symlink-install
-source install/setup.bash
+source install/setup.zsh           # or install/setup.bash, depending on your shell
 ```
 
 ### Keeping everyone's environment identical (no Docker)
 
 | Layer | How it is pinned | How to update after `git pull` |
 |---|---|---|
-| OS + ROS | Ubuntu 26.04 + ROS 2 Lyrical for everyone | `sudo apt update && sudo apt upgrade` |
-| ROS / apt dependencies | declared in every `package.xml` | `rosdep install --from-paths src --ignore-src -y` |
-| Python dependencies | `requirements.txt` with exact versions | `pip install -r requirements.txt` |
+| ROS 2, Python and system libraries | `pixi.lock` (exact versions, committed) | `pixi install` (`pixi run` / `pixi shell` also sync automatically) |
 | ORCA files | submodule pinned to one commit | `git submodule update --init --recursive` |
 
-`scripts/setup_env.sh` (planned) will run all of these in one go.
+To add a dependency, run `pixi add <package>` (conda-forge / RoboStack) or
+`pixi add --pypi <package>` (pip only), then commit `pixi.toml` and `pixi.lock` together.
+Don't install ROS from apt as well, so the two installs never get mixed up.
 
 ---
 
