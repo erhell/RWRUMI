@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>rwrumi_camera</name>
+  <version>0.1.0</version>
+  <description>OAK-D Pro driver for the UMI device: color, aligned depth, calibration and IMU.</description>
+  <maintainer email="noreply@example.com">RWR Team 4</maintainer>
+  <license>MIT</license>
+
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <!-- depthai comes from the pip section of environment.yml -->
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

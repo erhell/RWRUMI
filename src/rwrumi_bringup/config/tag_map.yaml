@@ -1,0 +1,15 @@
+# AprilTags that define the UMI world frame.
+#
+# size_m: side of the BLACK square in meters. MEASURE IT on the printed tag: every
+#         position scales directly with this value.
+# xyz:    tag center in the world frame, in meters.
+# rpy_deg: tag orientation in the world frame (roll, pitch, yaw), in degrees.
+#          Tag axes: x to the right, y up, z out of the tag.
+#
+# Several tags keep the pose available when one is hidden. Measure their relative positions.
+family: tag36h11
+tags:
+  - id: 0
+    size_m: 0.100
+    xyz: [0.0, 0.0, 0.0]
+    rpy_deg: [0.0, 0.0, 0.0]

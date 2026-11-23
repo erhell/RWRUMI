@@ -28,3 +28,8 @@ dependencies:
   - pkg-config=0.29
   - make=4
   - ninja=1
+  - pytest<9                  # pytest 9 breaks the launch_testing plugin of ROS Humble
+  # OAK-D Pro camera (no conda or RoboStack package for osx-arm64)
+  - pip
+  - pip:
+      - depthai==2.34.0.0     # v2 API, same major version as rwr_system

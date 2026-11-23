@@ -6,7 +6,7 @@ Project page: **https://erhell.github.io/RWRUMI/**
 This README is the working guide for Team 4: how the repository is structured, how to set
 up the environment, and how we add code and files.
 
-> **Status:** environment ready (ROS 2 Humble). Next: `rwrumi_description` and the first packages.
+> **Status:** OAK-D Pro driver and AprilTag localization working ([section 7](#7-camera-and-localization)). Next: test with a printed tag, then `rwrumi_description`.
 
 ---
 
@@ -31,7 +31,7 @@ mamba activate rwrumi
 colcon build --symlink-install
 ```
 
-Our machines: Ubuntu 26.04. The environment uses Python 3.12.
+Our machines: Ubuntu 26.04 and macOS (Apple silicon). The environment uses Python 3.12.
 
 ## 2. Daily workflow
 
@@ -60,6 +60,7 @@ RWRUMI/
     │   ├── LICENSE.orca     ORCA's license for the copied files
     │   └── SOURCE.md        where copied files come from + what we changed
     ├── rwrumi_interfaces/   custom messages (e.g. TactileArray.msg)
+    ├── rwrumi_camera/       OAK-D Pro driver
     ├── rwrumi_joint_sensors/
     ├── rwrumi_tactile/
     ├── rwrumi_pose/         global + relative pose estimation
@@ -71,11 +72,12 @@ RWRUMI/
 |---|---|---|
 | `rwrumi_description` | URDF + meshes | planned |
 | `rwrumi_interfaces` | custom `.msg` / `.srv` | planned |
+| `rwrumi_camera` | OAK-D Pro: color, aligned depth, calibration, IMU | working |
 | `rwrumi_joint_sensors` | joint sensor driver | planned |
 | `rwrumi_tactile` | tactile sensor driver | planned |
-| `rwrumi_pose` | pose estimation | planned (camera/tracker TBD) |
+| `rwrumi_pose` | AprilTag global + relative pose | working, not yet tested with a printed tag |
 | `rwrumi_recorder` | recording + export | planned |
-| `rwrumi_bringup` | launch files, configs | planned |
+| `rwrumi_bringup` | launch files, configs | camera + localization |
 
 ## 4. How we add things
 
@@ -128,9 +130,42 @@ ros2 pkg create --build-type ament_cmake  rwrumi_<name>   # messages, URDF/mesh-
 - If your PR adds, moves or removes a package, or settles an open decision, update this
   README and `docs/index.html` in the same PR.
 
+## 7. Camera and localization
+
+The OAK-D Pro gives color, depth aligned to color, and IMU. AprilTags (36h11) define a metric
+world frame, so the pose recovers immediately whenever a known tag is back in view.
+
+**Before the first run:** print a 36h11 tag, measure the side of its **black square**, and enter
+the ID and size in `src/rwrumi_bringup/config/tag_map.yaml`. Every position scales with this size.
+
+```bash
+ros2 launch rwrumi_bringup camera_localization.launch.py rviz:=true
+ros2 service call /umi/pose/set_anchor std_srvs/srv/Trigger   # zero the relative pose, e.g. at episode start
+```
+
+Launch arguments: `fps` (default 15, use 30 on USB 3), `ir_dot_intensity` (0.0 to 1.0, default off,
+helps depth on plain surfaces), `mxid`, `tag_map`, `rviz`.
+
+| Topic | Type | Content |
+|---|---|---|
+| `/umi/camera/color/image_raw` | `sensor_msgs/Image` | 960 × 540 BGR |
+| `/umi/camera/depth/image_raw` | `sensor_msgs/Image` | depth in mm, aligned to color, same stamp |
+| `/umi/camera/{color,depth}/camera_info` | `sensor_msgs/CameraInfo` | factory calibration |
+| `/umi/camera/imu` | `sensor_msgs/Imu` | raw accelerometer + gyroscope, 200 Hz |
+| `/umi/pose/camera` | `geometry_msgs/PoseStamped` | camera in `world`; also on TF |
+| `/umi/pose/relative` | `geometry_msgs/PoseStamped` | camera relative to the anchor |
+| `/umi/pose/status` | `diagnostic_msgs/DiagnosticStatus` | `ok`, `no_tags`, `unknown_tags`, `ambiguous`, `high_error` |
+| `/umi/pose/debug_image` | `sensor_msgs/Image` | detections drawn on the image |
+
+- No pose is published while no known tag is visible, so check `/umi/pose/status` when recording.
+- The first valid pose becomes the anchor until `set_anchor` is called.
+- Run the pose tests with `cd src/rwrumi_pose && python -m pytest test`.
+
 ## Open decisions
 
-- [ ] Camera / tracker for pose estimation
+- [x] Camera: OAK-D Pro
+- [ ] Tracking without visible tags (visual-inertial odometry / SLAM)
+- [ ] Object detection model and output format
 - [ ] Joint sensor hardware and interface
 - [ ] Tactile sensor hardware and message format
 - [ ] Dataset format (episode structure, sampling rate)

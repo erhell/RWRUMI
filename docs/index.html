@@ -138,6 +138,7 @@
       <a href="#adding">Adding things</a>
       <a href="#conventions">Conventions</a>
       <a href="#git">Git</a>
+      <a href="#camera">Camera</a>
     </nav>
   </div>
 </header>
@@ -153,12 +154,13 @@
       <span class="chip">mamba</span>
       <span class="chip">Python 3.12</span>
       <span class="chip">Ubuntu 26.04</span>
+      <span class="chip">macOS (Apple silicon)</span>
     </div>
     <div class="btns">
       <a class="btn primary" href="https://github.com/erhell/RWRUMI">Repository</a>
       <a class="btn ghost" href="https://rwr.ethz.ch/">Course website</a>
     </div>
-    <p class="note" style="margin-top:28px">Status: environment ready (ROS 2 Humble). Next: <code>rwrumi_description</code> and the first packages.</p>
+    <p class="note" style="margin-top:28px">Status: OAK-D Pro driver and AprilTag localization working (<a href="#camera">section 7</a>). Next: test with a printed tag, then <code>rwrumi_description</code>.</p>
   </div>
 
   <section id="setup">
@@ -198,18 +200,19 @@ source install/setup.zsh                              <span class="c"># or insta
       <div class="row"><span class="path">├── docs/index.html</span><span class="desc">This page, same content as the README</span><span class="pill done">exists</span></div>
       <div class="row"><span class="path">├── environment.yml</span><span class="desc">The shared environment (ROS 2 + all dependencies)</span><span class="pill done">exists</span></div>
       <div class="row"><span class="path">├── .gitignore</span><span class="desc"></span><span class="pill done">exists</span></div>
-      <div class="row"><span class="path">└── src/</span><span class="desc">All ROS 2 packages</span><span class="pill planned">planned</span></div>
+      <div class="row"><span class="path">└── src/</span><span class="desc">All ROS 2 packages</span><span class="pill done">exists</span></div>
       <div class="row"><span class="path">    ├── rwrumi_description/</span><span class="desc">Robot model: URDF, meshes (incl. files copied from ORCA)</span><span class="pill planned">planned</span></div>
       <div class="row"><span class="path">    │   ├── urdf/</span><span class="desc"></span><span></span></div>
       <div class="row"><span class="path">    │   ├── meshes/</span><span class="desc"></span><span></span></div>
       <div class="row"><span class="path">    │   ├── LICENSE.orca</span><span class="desc">ORCA's license for the copied files</span><span></span></div>
       <div class="row"><span class="path">    │   └── SOURCE.md</span><span class="desc">Where copied files come from + what we changed</span><span></span></div>
       <div class="row"><span class="path">    ├── rwrumi_interfaces/</span><span class="desc">Custom messages (e.g. TactileArray.msg)</span><span class="pill planned">planned</span></div>
+      <div class="row"><span class="path">    ├── rwrumi_camera/</span><span class="desc">OAK-D Pro: color, aligned depth, calibration, IMU</span><span class="pill done">working</span></div>
       <div class="row"><span class="path">    ├── rwrumi_joint_sensors/</span><span class="desc">Joint sensor driver</span><span class="pill planned">planned</span></div>
       <div class="row"><span class="path">    ├── rwrumi_tactile/</span><span class="desc">Tactile sensor driver</span><span class="pill planned">planned</span></div>
-      <div class="row"><span class="path">    ├── rwrumi_pose/</span><span class="desc">Global + relative pose estimation</span><span class="pill tbd">camera TBD</span></div>
+      <div class="row"><span class="path">    ├── rwrumi_pose/</span><span class="desc">AprilTag global + relative pose (not yet tested with a printed tag)</span><span class="pill done">working</span></div>
       <div class="row"><span class="path">    ├── rwrumi_recorder/</span><span class="desc">Recording + bag → HDF5 export</span><span class="pill planned">planned</span></div>
-      <div class="row"><span class="path">    └── rwrumi_bringup/</span><span class="desc">Launch files, configs, RViz setup</span><span class="pill planned">planned</span></div>
+      <div class="row"><span class="path">    └── rwrumi_bringup/</span><span class="desc">Launch files, configs, RViz setup</span><span class="pill done">camera + localization</span></div>
     </div>
   </section>
 
@@ -272,10 +275,39 @@ ros2 pkg create --build-type ament_cmake  rwrumi_&lt;name&gt;   <span class="c">
     </ul>
   </section>
 
+  <section id="camera">
+    <h2>7. Camera and localization</h2>
+    <p class="sub">The OAK-D Pro gives color, depth aligned to color, and IMU. AprilTags (36h11) define a metric world frame, so the pose recovers immediately whenever a known tag is back in view.</p>
+    <p><strong>Before the first run:</strong> print a 36h11 tag, measure the side of its <strong>black square</strong>, and enter the ID and size in <code>src/rwrumi_bringup/config/tag_map.yaml</code>. Every position scales with this size.</p>
+<pre>ros2 launch rwrumi_bringup camera_localization.launch.py rviz:=true
+ros2 service call /umi/pose/set_anchor std_srvs/srv/Trigger   <span class="c"># zero the relative pose, e.g. at episode start</span></pre>
+    <p>Launch arguments: <code>fps</code> (default 15, use 30 on USB 3), <code>ir_dot_intensity</code> (0.0 to 1.0, default off, helps depth on plain surfaces), <code>mxid</code>, <code>tag_map</code>, <code>rviz</code>.</p>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Topic</th><th>Type</th><th>Content</th></tr>
+        <tr><td><code>/umi/camera/color/image_raw</code></td><td><code>sensor_msgs/Image</code></td><td>960 × 540 BGR</td></tr>
+        <tr><td><code>/umi/camera/depth/image_raw</code></td><td><code>sensor_msgs/Image</code></td><td>depth in mm, aligned to color, same stamp</td></tr>
+        <tr><td><code>/umi/camera/{color,depth}/camera_info</code></td><td><code>sensor_msgs/CameraInfo</code></td><td>factory calibration</td></tr>
+        <tr><td><code>/umi/camera/imu</code></td><td><code>sensor_msgs/Imu</code></td><td>raw accelerometer + gyroscope, 200 Hz</td></tr>
+        <tr><td><code>/umi/pose/camera</code></td><td><code>geometry_msgs/PoseStamped</code></td><td>camera in <code>world</code>; also on TF</td></tr>
+        <tr><td><code>/umi/pose/relative</code></td><td><code>geometry_msgs/PoseStamped</code></td><td>camera relative to the anchor</td></tr>
+        <tr><td><code>/umi/pose/status</code></td><td><code>diagnostic_msgs/DiagnosticStatus</code></td><td><code>ok</code>, <code>no_tags</code>, <code>unknown_tags</code>, <code>ambiguous</code>, <code>high_error</code></td></tr>
+        <tr><td><code>/umi/pose/debug_image</code></td><td><code>sensor_msgs/Image</code></td><td>detections drawn on the image</td></tr>
+      </table>
+    </div>
+    <ul class="rules">
+      <li>No pose is published while no known tag is visible, so check <code>/umi/pose/status</code> when recording.</li>
+      <li>The first valid pose becomes the anchor until <code>set_anchor</code> is called.</li>
+      <li>Run the pose tests with <code>cd src/rwrumi_pose &amp;&amp; python -m pytest test</code>.</li>
+    </ul>
+  </section>
+
   <section id="decisions">
     <h2>Open decisions</h2>
     <ul class="todo">
-      <li>Camera / tracker for pose estimation</li>
+      <li><s>Camera</s>: OAK-D Pro</li>
+      <li>Tracking without visible tags (visual-inertial odometry / SLAM)</li>
+      <li>Object detection model and output format</li>
       <li>Joint sensor hardware and interface</li>
       <li>Tactile sensor hardware and message format</li>
       <li>Dataset format (episode structure, sampling rate)</li>
