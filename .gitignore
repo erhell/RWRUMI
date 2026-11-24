@@ -7,5 +7,9 @@ log/
 __pycache__/
 *.pyc
 
+# CAD exports: too large for git, share them outside the repo
+*.step
+*.stp
+
 # old pixi environment (delete the folder with: rm -rf .pixi)
 .pixi/
